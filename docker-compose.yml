@@ -1,0 +1,40 @@
+version: "3.1"
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./docker/nginx:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build: ./docker/php-fpm
+    container_name: php-fpm
+    working_dir: /application
+    volumes:
+      - .:/application
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3.7.5-management
+    working_dir: /application
+    hostname: rabbit-mq
+    container_name: symfony4-rabbit-mq
+    volumes:
+      - .:/application
+      - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+
